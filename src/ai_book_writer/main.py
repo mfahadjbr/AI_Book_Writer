@@ -1,16 +1,18 @@
+import logging
 import streamlit as st
 from agents import BookWriterAgents
 from tasks import BookWriterTasks
 from crewai import Crew, LLM
 from dotenv import load_dotenv
 import os
+from litellm.exceptions import BadRequestError
 
 # Load environment variables
 load_dotenv()
 api_keys = os.getenv("GEMINI_API_KEY")
 
 # Initialize model
-model = LLM(model="gemini/gemini-2.0-flash-exp", api_key="AIzaSyA75MtcUV2U0spz_k2S1Hg-z5XADCvv1O8")
+model = LLM(model="gemini/gemini-2.0-flash-exp", api_key=api_keys)
 
 # Streamlit UI
 st.set_page_config(page_title="AI Book Writer", page_icon="📖", layout="centered")
@@ -85,10 +87,17 @@ crew = Crew(
 # Process when button is clicked
 if submit:
     with st.spinner("Processing... Please wait..."):
-        results = crew.kickoff()
-        formatted_results = format_output(results)
-        st.text_area("Generated Content", formatted_results, height=700)
-        save_to_markdown(formatted_results)
-        download_button("output.md")
+        try:
+            results = crew.kickoff()
+            formatted_results = format_output(results)
+            st.text_area("Generated Content", formatted_results, height=700)
+            save_to_markdown(formatted_results)
+            download_button("output.md")
+        except BadRequestError as e:
+            st.error("An error occurred while processing your request. Please check your inputs and try again.")
+            logging.error(f"BadRequestError: {e}", exc_info=True)
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {e}")
+            logging.error(f"Error: {e}", exc_info=True)
 
 
