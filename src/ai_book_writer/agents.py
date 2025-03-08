@@ -5,7 +5,7 @@ load_dotenv()
 api_keys=os.getenv("GEMINI_API_KEY")
 
 
-model=LLM(model="gemini/gemini-2.0-flash-exp" ,api_key=api_keys)
+model=LLM(model="gemini/gemini-2.0-flash-exp" ,api_key="AIzaSyA75MtcUV2U0spz_k2S1Hg-z5XADCvv1O8")
 
 class BookWriterAgents:
 
